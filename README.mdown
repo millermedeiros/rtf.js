@@ -1,0 +1,129 @@
+# rtf.js
+
+RTF document generator using JavaScript.
+
+
+## Why?
+
+I couldn't find a JavaScript library to generate [RTF
+documents](http://en.wikipedia.org/wiki/Rich_Text_Format), since RTF is just
+a plain text file and it's almost readable it shouldn't be hard to implement
+a simple API wrapper - just so I don't have to remember how to set the
+font-family or to always create a template on a text editor like TextEdit (Mac)
+or WordPad (Windows).
+
+
+## Plans
+
+The initial plan is to implement *most* features described on the [RTF 1.0
+spec](http://latex2rtf.sourceforge.net/RTF-Spec-1.0.txt) since the [other
+versions](http://en.wikipedia.org/wiki/Rich_Text_Format#Version_changes) have
+a lot of stuff which I never seen on any document and that I don't find that
+important (besides PNG/JPEG in hexadecimal since 1.5).
+
+According to Wikipedia most of the advanced features aren't supported by all
+readers so I probably won't implement them - e.g. drawing objects (open office,
+abiword, KWord), headers and footers (wordpad), borders and shading, etc... The
+goal is to generate documents that can be read/written by WordPad and TextEdit
+and support the basic text formatting features before adding support to tables
+and images.
+
+Will probably only implement features that are available on TextEdit.
+
+
+### API style
+
+I'm thinking in maybe do something that is familiar to JS/CSS devs, passing all
+the settings as objects and creating a "stylesheet" with all the properties.
+
+I'm not familiar with the RTF syntax (just browsed the spec quickly) so I'm not
+even sure what kinds of concepts are already present.
+
+I'm thinking on something like this:
+
+```js
+// docProps
+var doc = rtf.create({
+            paperWidth : 12240,
+            paperHeight : 15840,
+            marginLeft : 1800,
+            landscape : false
+        });
+
+
+// --- addStyle
+// styleName, [baseStyleName, ] props
+
+doc.addStyle('foo', {
+    fontSize : 20,
+    fontWeight : 'bold',
+    textTransform : 'uppercase'
+});
+
+doc.addStyle('bar', 'foo', {
+    textTransform : 'none'
+});
+
+
+// --- addParagraph
+// content, styleName
+// content, props
+// paragraphObj
+
+doc.addParagraph('Lorem Ipsum Dolor', 'foo');
+
+doc.addParagraph('sit amet', {
+    fontSize : 12,
+    fontWeigth : 'normal',
+    textTransform : 'none'
+});
+
+
+// --- createParagraph
+
+var para = doc.createParagraph();
+
+// --- addNode
+// content, styleName
+// content, props
+
+para.addNode('Some', 'foo');
+para.addNode('text', {
+    fontWeight : 'normal'
+});
+para.addNode('here.', 'bar');
+
+doc.addParagraph(para);
+
+
+// --- toString
+
+// return RTF document as string
+doc.toString();
+```
+
+Probably generate a *document tree* with all the elements and only do the
+conversion after calling `toString()`, so the same API could be used to create
+other kinds of documents by simply replacing the generator.
+
+
+
+## RTF sample
+
+```rtf
+{\rtf1\ansi{\fonttbl\f0\fswiss Helvetica;}\f0\pard
+Lorem Ipsum {\b dolor} sit amet.\par
+}
+```
+
+
+## Other open-source libraries that might be useful
+
+ - [ruby-rtf](https://github.com/thechrisoshow/rtf)
+
+
+## Important
+
+PS: I'm not sure how far this project will go and not even if I will ever do
+it. Created the repository in case someone else is planning to code the same
+thing and want to do it together, contributors are very welcome.
